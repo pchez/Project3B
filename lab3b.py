@@ -131,23 +131,23 @@ def blockConsistencyHelper(inode, superblock, group):
 	for allocBlock in allocated:
 		print('ALLOCATED BLOCK', allocBlock, 'ON FREELIST')
 	
-def inodeAllocationAudit():
-	
+#def inodeAllocationAudit():
+	#swag
 
 if __name__=="__main__":
 
-    #-----------open file----------------------
-    with open('trivial.csv', newline="") as filesysCSV:
-    	filesysReader = csv.reader(filesysCSV, delimiter=',')
-    	filesys = list(filesysReader) #<---- the main data structure that stores everything in a list of lists
+	#-----------open file----------------------
+	with open('trivial.csv', newline="") as filesysCSV:
+		filesysReader = csv.reader(filesysCSV, delimiter=',')
+		filesys = list(filesysReader) #<---- the main data structure that stores everything in a list of lists
     	
-    #----------read everything into lists and lists of lists----------
-    superblock, group, bfree, ifree, inode, dirent, indirect = createArrays(filesys)
+    	#----------read everything into lists and lists of lists----------
+	superblock, group, bfree, ifree, inode, dirent, indirect = createArrays(filesys)
     
-    #invalidBlockHelper(inode);  #examine every blk pointer in: i-node, direct blk, single, double, tripple indirect    
-    # for this we will loop through EVERY inode, and check all of its blk pointers 
-    # errors here will be either INVALID BLOCK or RESERVED (meaning that the blk number is in one of the SUPER, GROUP, IFREE, BFREE, and INODE TABLE areas)	
-    blockConsistencyHelper(inode, superblock, group)
-    inodeAllocationAudit()
+	#invalidBlockHelper(inode);  #examine every blk pointer in: i-node, direct blk, single, double, tripple indirect    
+	# for this we will loop through EVERY inode, and check all of its blk pointers 
+	# errors here will be either INVALID BLOCK or RESERVED (meaning that the blk number is in one of the SUPER, GROUP, IFREE, BFREE, and INODE TABLE areas)	
+	blockConsistencyHelper(inode, superblock, group)
+	#inodeAllocationAudit()
 
 
