@@ -80,11 +80,11 @@ def blockConsistencyHelper(inode, superblock, group):
 				else:
 					blockType = ''
 					
-				if int(inode[key][j]) <= 0 or int(inode[key][j]) > int(superblock[0]): #invalid block
+				if int(inode[key][j]) < 0 or int(inode[key][j]) > int(superblock[0]): #invalid block
 					print('INVALID ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="")  
 				
-				elif int(inode[key][j]) < lastInodeBlk : #reserved block
-					print('RESERVED ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET', j-10, sep="")
+				elif int(inode[key][j]) < lastInodeBlk and int(inode[key][j]) > 0: #reserved block
+					print('RESERVED ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="")
 				
 				else: #mark block as visited or duplicate (maybe create a new array with markers per block) 
 				 	if inode[key][j] in referenced:
@@ -92,8 +92,8 @@ def blockConsistencyHelper(inode, superblock, group):
 				 	else:
 				 		referenced.append(int(inode[key][j]))
 				 		
-		else: #inode block itself has error -- how to handle???
-			print('INVALID BLOCK ', inode[key], ' IN INODE ', inode[key], ' AT OFFSET ???', sep="")  
+		#else: #inode block itself has error -- how to handle???
+			#print('INVALID BLOCK ', inode[key], ' IN INODE ', inode[key], ' AT OFFSET ???', sep="")  
 	
 
 	for key in indirect.keys():
