@@ -51,30 +51,64 @@ def createArrays(fs):
 def invalidBlockHelper(inode, superblock, group):
 	# First Check for Invalid INODES
 	s = ''
+	lastInodeBlk = group[7] + ((superblock[3]*superblock[1])/superblock[2]) 
 	for key in inode.keys():
 		# only check if valid inode num, valid mode number, and greater than zero link count
 		if inode[key] > 0 and inode[key][2] > 0 and inode[key][5] > 0:		
 
-			for j in range(13,27):
-				if inode[key][j] < 0 or inode[key][j] > superblock[6]: #invalid block
-					print('INVALID BLOCK ', inode[key][j], ' IN INODE ', inode[key], 'AT OFFSET ???')  
-				elif inode[key][j] <= group[8]: #reserved block
-					print('RESERVED BLOCK ', inode[key][j], 'IN INODE ', inode[key], 'AT OFFSET ???')
+			for j in range(12,26):
+				if inode[key][j] <= 0 or inode[key][j] > superblock[4]: #invalid block
+					if j == 24:
+						print('INVALID INDIRECT BLOCK ', inode[key][j], ' IN INODE ', inode[key], 'AT OFFSET ', j-12)  
+					elif j == 25:
+						print('INVALID DOUBLE INDIRECT BLOCK ', inode[key][j], ' IN INODE ', inode[key], 'AT OFFSET ', j-12)  	
+					elif j == 26:
+						print('INVALID TRIPPLE INDIRECT BLOCK ', inode[key][j], ' IN INODE ', inode[key], 'AT OFFSET ', j-12)  	
+					else:
+						print('INVALID BLOCK ', inode[key][j], ' IN INODE ', inode[key], 'AT OFFSET ', j-12)  
+				elif inode[key][j] < lastInodeBlk : #reserved block
+					if j == 24:
+						print('RESERVED INDIRECT BLOCK ', inode[key][j], 'IN INODE ', inode[key], 'AT OFFSET ' j-12)
+					elif j == 25:
+						print('RESERVED DOUBLE INDIRECT BLOCK ', inode[key][j], 'IN INODE ', inode[key], 'AT OFFSET ' j-12)
+					elif j == 26:
+						print('RESERVED TRIPPLE INDIRECT BLOCK ', inode[key][j], 'IN INODE ', inode[key], 'AT OFFSET ' j-12)
+					else:
+						print('RESERVED BLOCK ', inode[key][j], 'IN INODE ', inode[key], 'AT OFFSET ' j-12)
 				else: #mark block for duplicate (maybe create a new array with markers per block) 
 				 	if inode[key][j] in referenced:
-				 		print('DUPLICATE ', 'BLOCK ', inode[key][j], 'IN INODE ', inode[key], 'AT OFFSET ???')
+				 		print('DUPLICATE ', 'BLOCK ', inode[key][j], 'IN INODE ', inode[key], 'AT OFFSET ', j-12)
 				 	else:
 				 		referenced.append(blockNum)
 				 		
 		else: #inode block itself has error -- how to handle???
 			print('INVALID BLOCK ', inode[key], ' IN INODE ', inode[key], 'AT OFFSET ???')  
 	
-	for key in dirent.keys():
-		if dirent[key] > 0:
-			
-			
-	
 
+	for key in indirect.keys():
+		if indirect[key] > 0:	
+			if indirect[key][3] <= 0 or indirect[key][3] > superblock[4]:
+				if indirect[key][1] == 1:
+					print('INVALID BLOCK ', indirect[key][3], ' IN INODE ', indirect[key], 'AT OFFSET ', indirect[2])
+				elif indirect[key][1] == 2:
+					print('INVALID INDIRECT BLOCK ', indirect[key][3], ' IN INODE ', indirect[key], 'AT OFFSET ', indirect[2])
+				else:				
+					print('INVALID DOUBLE INDIRECT BLOCK ', indirect[key][3], ' IN INODE ', indirect[key], 'AT OFFSET ', indirect[2])
+			elif indirect[key][3] <= lastInodeBlk:
+				if indirect[key][1] == 1:
+					print('RESERVED BLOCK ', indirect[key][3], 'IN INODE ', inode[key], 'AT OFFSET ', indirect[2])
+				elif indirect[key][1] == 2:
+					print('RESERVED INDIRECT BLOCK ', indirect[key][3], 'IN INODE ', inode[key], 'AT OFFSET ', indirect[2])
+				else:
+					print('RESERVED DOUBLE INDIRECT BLOCK ', indirect[key][3], 'IN INODE ', inode[key], 'AT OFFSET ', indirect[2])
+			
+		else:  # what error message do we output here? for later
+
+	for key in dirent.keys():
+		if dirent[key] > 0 and inode[key][] > 0:
+			
+		else:
+			
 
 if __name__=="__main__":
 
