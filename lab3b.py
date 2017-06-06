@@ -142,11 +142,11 @@ def inodeAllocationAudit():
 		if inode_num in ifree: 
 			#if file or directory has links associated, allocated
 			if (inode[inode_num][0]=='d' or inode[inode_num][0]=='f') and int(inode[inode_num][4]) > 0: 		
-				print('ALLOCATED INODE ', inode_num, ' ON FREELIST')
+				print('ALLOCATED INODE ', inode_num, ' ON FREELIST', sep="")
 		else: #not on freelist
 			#if file or directory doesn't have links associated, unallocated
 			if (inode[inode_num][0]=='d' or inode[inode_num][0]=='f') and int(inode[inode_num][4])==0: 
-				print('UNALLOCATED INODE ', inode_num, 'NOT ON FREELIST')
+				print('UNALLOCATED INODE ', inode_num, 'NOT ON FREELIST', sep="")
 			
 
 def directoryConsistencyAudit():
