@@ -8,10 +8,10 @@ TARCONTENTS = $(SOURCES) README Makefile
 
 default:
 	cp lab3b.py lab3b
-	python3 $(SOURCES)
+	chmod +x lab3b
 
 clean:
-	@- #nothing :)
+	@- rm lab3b $(TARNAME)
 
 dist: 
 	tar -czvf $(TARNAME) $(TARCONTENTS)
