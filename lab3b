@@ -1,5 +1,4 @@
 #!/usr/bin/python
-from __future__ import print_function
 import csv
 import sys
 
@@ -72,7 +71,7 @@ def blockConsistencyHelper(inode, superblock, group):
 		if int(key) > 0 and int(inode[key][1]) > 0 and int(inode[key][4]) > 0:		
 
 			for j in range(10,25):
-				#print 'key ', key, 'iblock num ', j, 'address ', inode[key][j]  	#for debugging - DELETE
+				#print('key ', key, 'iblock num ', j, 'address ', inode[key][j]) 	#for debugging - DELETE
 				
 				if j == 22:		#get type of block for stdout
 					blockType = 'INDIRECT '
@@ -84,7 +83,7 @@ def blockConsistencyHelper(inode, superblock, group):
 					blockType = ''
 					
 				if int(inode[key][j]) < 0 or int(inode[key][j]) > int(superblock[0]): #invalid block
-					print('INVALID ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="") 
+					print('INVALID ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="")  
 				
 				elif int(inode[key][j]) < lastInodeBlk and int(inode[key][j]) > 0: #reserved block
 					print('RESERVED ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="")
@@ -174,9 +173,9 @@ def directoryConsistencyAudit():
 		if inode[inode_num][0]=='d' or inode[inode_num][0]=='f' or inode[inode_num][0]=='s': #inode type is file, directory, or link
 			if inode_num in fileLinks.keys():
 				if int(inode[inode_num][4]) != fileLinks[inode_num]:	#num of links that we tracked not same as ref count listed in this entry
-					print('INODE ', inode_num, ' HAS ', fileLinks[inode_num], ' LINKS BUT LINKCOUNT IS ', inode[inode_num][4], sep="")
+					print('INODE ', inode_num, ' HAS ', fileLinks[inode_num], ' LINKS BUT LINKCOUNT IS  ', inode[inode_num][4], sep="")
 			else:
-				print('INODE ', inode_num, ' HAS ', fileLinks[inode_num], ' LINKS BUT LINKCOUNT IS ', inode[inode_num][4], sep="")
+				print('INODE ', inode_num, ' HAS ', fileLinks[inode_num], ' LINKS BUT LINKCOUNT IS  ', inode[inode_num][4], sep="")
 	
 	
 	#----------------directory validity----------------------
@@ -231,15 +230,11 @@ if __name__=="__main__":
 	if len(sys.argv) < 2:
 		sys.stderr.write('Please provide one file system to test')
 		exit(1)
-
 	#-----------open file----------------------
 	with open(sys.argv[1]) as filesysCSV:
 		filesysReader = csv.reader(filesysCSV, delimiter=',')
 		filesys = list(filesysReader) #<---- the main data structure that stores everything in a list of lists
-	#except:
-#		sys.stderr.write('File system not found')
-		#exit(1)
-		
+	
 		#----------read everything into lists and lists of lists----------
 	superblock, group, bfree, ifree, inode, dirent, indirect = createArrays(filesys)
 
