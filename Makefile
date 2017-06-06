@@ -7,6 +7,7 @@ TARNAME = lab3b-404159386.tar.gz
 TARCONTENTS = $(SOURCES) README Makefile
 
 default:
+	cp lab3b.py lab3b
 	python3 $(SOURCES)
 
 clean:

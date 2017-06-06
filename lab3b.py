@@ -1,4 +1,5 @@
 import csv
+import sys
 
 #SUPERBLOCK
 #GROUP
@@ -131,13 +132,105 @@ def blockConsistencyHelper(inode, superblock, group):
 	for allocBlock in allocated:
 		print('ALLOCATED BLOCK', allocBlock, 'ON FREELIST')
 	
-#def inodeAllocationAudit():
-	#swag
+def inodeAllocationAudit():
+	allocated = []
+	unallocated = []
+	
+	for inode_num in inode.keys():
+		if inode_num in ifree: 
+			#if file or directory has links associated, allocated
+			if (inode[inode_num][0]=='d' or inode[inode_num][0]=='f') and int(inode[inode_num][4]) > 0: 		
+				print('ALLOCATED INODE ', inode_num, ' ON FREELIST')
+		else: #not on freelist
+			#if file or directory doesn't have links associated, unallocated
+			if (inode[inode_num][0]=='d' or inode[inode_num][0]=='f') and int(inode[inode_num][4])==0: 
+				print('UNALLOCATED INODE ', inode_num, 'NOT ON FREELIST')
+			
 
+def directoryConsistencyAudit():
+	fileLinks = {}
+	lastInodeBlk = int(group[7]) + ((int(superblock[3])*int(superblock[1]))/int(superblock[2]) )
+	
+	#-----------------link count-----------------------------
+	for inode_num in inode.keys(): #first count number of links
+		"""
+		if inode[inode_num][0]=='d' or inode[inode_num][0]=='f' or inode[inode_num][0]=='s':
+			if inode_num in fileLinks.keys(): #if inode_num already accounted for in list of links
+				fileLinks[inode_num] = fileLinks[inode_num] + 1
+			else:							#if not already accounted for
+				fileLinks[inode_num] = 1	#start the first count
+		"""
+		for dir_inode in dirent.keys(): #loop through all directory entries
+			for dir_idx in range(0,len(dirent[dir_inode])):
+				if int(dirent[dir_inode][dir_idx][1])==inode_num:
+					if inode_num in fileLinks.keys(): #if inode_num already accounted for in list of links
+						fileLinks[inode_num] = fileLinks[inode_num] + 1
+					else:							#if not already accounted for
+						fileLinks[inode_num] = 1	#start the first count
+	
+	for inode_num in inode.keys():
+		if inode[inode_num][0]=='d' or inode[inode_num][0]=='f' or inode[inode_num][0]=='s': #inode type is file, directory, or link
+			if inode_num in fileLinks.keys():
+				if int(inode[inode_num][4]) != fileLinks[inode_num]:	#num of links that we tracked not same as ref count listed in this entry
+					print('INODE ', inode_num, ' HAS ', fileLinks[inode_num], ' LINKS BUT LINKCOUNT IS  ', inode[inode_num][4], sep="")
+			else:
+				print('INODE ', inode_num, ' HAS ', fileLinks[inode_num], ' LINKS BUT LINKCOUNT IS  ', inode[inode_num][4], sep="")
+	
+	
+	#----------------directory validity----------------------
+	#accessing a directory is invalid when it doesnt show up in the list of inodes or when the link count is 0
+	unallocFlag = 0
+	invalidFlag = 0
+	for inode_num in dirent.keys():
+		for dir_idx in range(0,len(dirent[inode_num])):
+			refInode = int(dirent[inode_num][dir_idx][1])
+			if refInode in inode.keys():
+				if int(inode[refInode][4]==0): #if link count is 0
+					unallocFlag = 1
+			else: 	#not in list of inodes
+				if refInode > int(group[2]) or refInode < 0: #invalid inode number
+					invalidFlag = 1
+				else:
+					unallocFlag = 1
+		
+		
+			if unallocFlag==1:
+				print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][4], ' UNALLOCATED INODE ', dirent[inode_num][dir_idx][1], sep="")
+			if invalidFlag==1:
+				print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][4], ' INVALID INODE ', dirent[inode_num][dir_idx][1], sep="")
+			
+			unallocFlag = 0
+			invalidFlag = 0
+	
+	#-------validity of . and .. directories----------------
+	ref_dict = {}
+	for inode_num in dirent.keys(): 	#get a dict of directory entries and the inodes they reference
+		for dir_idx in range(0,len(dirent[inode_num])):
+			if inode_num in ref_dict.keys():
+				ref_dict[inode_num].append(int(dirent[inode_num][dir_idx][1]))
+			else:
+				ref_dict[inode_num] = [int(dirent[inode_num][dir_idx][1])]
+	
+	for inode_num in dirent.keys():
+		parent_inode = inode_num
+		for dir_idx in range(0,len(dirent[inode_num])):
+			ref_inode = int(dirent[inode_num][dir_idx][1])
+			if dirent[inode_num][dir_idx][-1]=="'.'":
+				if ref_inode != parent_inode:	
+					print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', inode_num, sep="")
+			if dirent[inode_num][dir_idx][-1]=="'..'":
+				if ref_inode in ref_dict.keys():
+					if parent_inode not in ref_dict[ref_inode]: #if the directory above contains a ref to this directory entry
+						print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', inode_num, sep="")
+				else:
+					print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', inode_num, sep="")
 if __name__=="__main__":
-
+	#read arguments
+	if len(sys.argv)!=2:
+		print('Please provide one file system to test')
+		exit(1)
 	#-----------open file----------------------
-	with open('trivial.csv', newline="") as filesysCSV:
+	with open(sys.argv[1]) as filesysCSV:
 		filesysReader = csv.reader(filesysCSV, delimiter=',')
 		filesys = list(filesysReader) #<---- the main data structure that stores everything in a list of lists
     	
@@ -148,5 +241,6 @@ if __name__=="__main__":
 	# for this we will loop through EVERY inode, and check all of its blk pointers 
 	# errors here will be either INVALID BLOCK or RESERVED (meaning that the blk number is in one of the SUPER, GROUP, IFREE, BFREE, and INODE TABLE areas)	
 	blockConsistencyHelper(inode, superblock, group)
-	#inodeAllocationAudit()
+	inodeAllocationAudit()
+	directoryConsistencyAudit()
 
