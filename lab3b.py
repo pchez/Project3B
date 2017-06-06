@@ -132,6 +132,9 @@ def blockConsistencyHelper(inode, superblock, group):
 		print('ALLOCATED BLOCK', allocBlock, 'ON FREELIST')
 	
 def inodeAllocationAudit():
+	for key in inode.keys():
+		octal_mode = inode[key][1]
+		if
 	
 
 if __name__=="__main__":
