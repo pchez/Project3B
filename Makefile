@@ -3,4 +3,15 @@
 # ID: 404159386 and 404616605
 
 SOURCES = lab3b.py
-EXECNAME = lab3a
+TARNAME = lab3b-404159386.tar.gz
+TARCONTENTS = $(SOURCES) README Makefile
+
+default:
+	python3 $(SOURCES)
+
+clean:
+	@- #nothing :)
+
+dist: 
+	tar -czvf $(TARNAME) $(TARCONTENTS)
+	

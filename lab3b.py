@@ -80,11 +80,11 @@ def blockConsistencyHelper(inode, superblock, group):
 				else:
 					blockType = ''
 					
-				if int(inode[key][j]) <= 0 or int(inode[key][j]) > int(superblock[0]): #invalid block
+				if int(inode[key][j]) < 0 or int(inode[key][j]) > int(superblock[0]): #invalid block
 					print('INVALID ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="")  
 				
-				elif int(inode[key][j]) < lastInodeBlk : #reserved block
-					print('RESERVED ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET', j-10, sep="")
+				elif int(inode[key][j]) < lastInodeBlk and int(inode[key][j]) > 0: #reserved block
+					print('RESERVED ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="")
 				
 				else: #mark block as visited or duplicate (maybe create a new array with markers per block) 
 				 	if inode[key][j] in referenced:
@@ -92,8 +92,8 @@ def blockConsistencyHelper(inode, superblock, group):
 				 	else:
 				 		referenced.append(int(inode[key][j]))
 				 		
-		else: #inode block itself has error -- how to handle???
-			print('INVALID BLOCK ', inode[key], ' IN INODE ', inode[key], ' AT OFFSET ???', sep="")  
+		#else: #inode block itself has error -- how to handle???
+			#print('INVALID BLOCK ', inode[key], ' IN INODE ', inode[key], ' AT OFFSET ???', sep="")  
 	
 
 	for key in indirect.keys():
@@ -131,26 +131,22 @@ def blockConsistencyHelper(inode, superblock, group):
 	for allocBlock in allocated:
 		print('ALLOCATED BLOCK', allocBlock, 'ON FREELIST')
 	
-def inodeAllocationAudit():
-	for key in inode.keys():
-		octal_mode = inode[key][1]
-		if
-	
+#def inodeAllocationAudit():
+	#swag
 
 if __name__=="__main__":
 
-    #-----------open file----------------------
-    with open('trivial.csv', newline="") as filesysCSV:
-    	filesysReader = csv.reader(filesysCSV, delimiter=',')
-    	filesys = list(filesysReader) #<---- the main data structure that stores everything in a list of lists
+	#-----------open file----------------------
+	with open('trivial.csv', newline="") as filesysCSV:
+		filesysReader = csv.reader(filesysCSV, delimiter=',')
+		filesys = list(filesysReader) #<---- the main data structure that stores everything in a list of lists
     	
-    #----------read everything into lists and lists of lists----------
-    superblock, group, bfree, ifree, inode, dirent, indirect = createArrays(filesys)
+    	#----------read everything into lists and lists of lists----------
+	superblock, group, bfree, ifree, inode, dirent, indirect = createArrays(filesys)
     
-    #invalidBlockHelper(inode);  #examine every blk pointer in: i-node, direct blk, single, double, tripple indirect    
-    # for this we will loop through EVERY inode, and check all of its blk pointers 
-    # errors here will be either INVALID BLOCK or RESERVED (meaning that the blk number is in one of the SUPER, GROUP, IFREE, BFREE, and INODE TABLE areas)	
-    blockConsistencyHelper(inode, superblock, group)
-    inodeAllocationAudit()
-
+	#invalidBlockHelper(inode);  #examine every blk pointer in: i-node, direct blk, single, double, tripple indirect    
+	# for this we will loop through EVERY inode, and check all of its blk pointers 
+	# errors here will be either INVALID BLOCK or RESERVED (meaning that the blk number is in one of the SUPER, GROUP, IFREE, BFREE, and INODE TABLE areas)	
+	blockConsistencyHelper(inode, superblock, group)
+	#inodeAllocationAudit()
 
