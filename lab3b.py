@@ -244,11 +244,11 @@ def directoryConsistencyAudit():
 					print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', inode_num, sep="")
 			if dirent[inode_num][dir_idx][-1]=="'..'":
 				if ref_inode in ref_dict.keys():
+					if inode_num==2 and ref_inode != 2:
+						print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', 2, sep="")
 					if parent_inode not in ref_dict[ref_inode]: #if the directory above contains a ref to this directory entry
 						print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', inode_num, sep="")
-				elif inode_num==2:	#root directory's '..' refers to itself
-					if ref_inode != 2:
-						print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', 2, sep="")
+						
 				else:
 					print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', inode_num, sep="")
 if __name__=="__main__":

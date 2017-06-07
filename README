@@ -10,4 +10,5 @@ SOURCES:
 
 INCLUDED FILES:
 1) lab3b.py - Python source file for this project 
-2) some random csv god knows what the eff its named 
+2) Makefile that converts Python source file into executable 
+3) README - text file containing descriptions of all included files
