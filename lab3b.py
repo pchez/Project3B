@@ -93,15 +93,10 @@ def blockConsistencyHelper(inode, superblock, group):
 				elif int(inode[key][j]) < lastInodeBlk and int(inode[key][j]) > 0: #reserved block
 					print('RESERVED ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', offset, sep="")
 				
-<<<<<<< HEAD
-				elif int(inode[key][j]) != 0: #mark block as visited or duplicate (maybe create a new array with markers per block) 
-				 	if int(inode[key][j]) in referenced:
-				 		print('DUPLICATE ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="")
-=======
 				else: #mark block as visited or duplicate (maybe create a new array with markers per block) 
 				 	if inode[key][j] in referenced:
-				 		print('DUPLICATE ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET', offset, sep="")
->>>>>>> 320eac7669a50dc13696846566ae8ff71d8b0edc
+				 		print('DUPLICATE ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', offset, sep="")
+
 				 	else:
 				 		referenced.append(int(inode[key][j]))	
 		#else: #inode block itself has error -- how to handle???
@@ -231,13 +226,13 @@ def directoryConsistencyAudit():
 				else:
 					print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', inode_num, sep="")
 if __name__=="__main__":
-	#read arguments
-	#if len(sys.argv) < 2:
-#		sys.stderr.write('Please provide one file system to test\n')
-		#exit(1)
+	read arguments
+	if len(sys.argv) < 2:
+		sys.stderr.write('Please provide one file system to test\n')
+		exit(1)
 
 	#-----------open file----------------------
-	with open('trivial.csv') as filesysCSV:
+	with open(sys.argv[1]) as filesysCSV:
 		filesysReader = csv.reader(filesysCSV, delimiter=',')
 		filesys = list(filesysReader) #<---- the main data structure that stores everything in a list of lists
 	#except:
