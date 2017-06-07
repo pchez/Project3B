@@ -76,22 +76,26 @@ def blockConsistencyHelper(inode, superblock, group):
 				
 				if j == 22:		#get type of block for stdout
 					blockType = 'INDIRECT '
+					offset = 12  
 				elif j == 23:
 					blockType = 'DOUBLE INDIRECT '
+					offset = 12 + int(superblock[2])/4
 				elif j == 24:
-					blockType = 'TRIPPLE INDIRECT '	
+					blockType = 'TRIPPLE INDIRECT '
+					offset = 12 + (int(superblock[2])/4) + ((int(superblock[2])/4)*(int(superblock[2])/4))	
 				else:
 					blockType = ''
+					offset = j-10
 					
 				if int(inode[key][j]) < 0 or int(inode[key][j]) > int(superblock[0]): #invalid block
-					print('INVALID ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="") 
+					print('INVALID ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', offset, sep="") 
 				
 				elif int(inode[key][j]) < lastInodeBlk and int(inode[key][j]) > 0: #reserved block
-					print('RESERVED ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="")
+					print('RESERVED ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', offset, sep="")
 				
 				else: #mark block as visited or duplicate (maybe create a new array with markers per block) 
 				 	if inode[key][j] in referenced:
-				 		print('DUPLICATE ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET', j-10, sep="")
+				 		print('DUPLICATE ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET', offset, sep="")
 				 	else:
 				 		referenced.append(int(inode[key][j]))
 				 		
