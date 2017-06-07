@@ -12,7 +12,6 @@ import sys
 #INDIRECT - dictionary with key as parent inode and values as the rest of the INDIRECT entry
 
 BLOCKSIZE = 1024	
-referenced = []
 possibleValidBlocks = []
 
 
@@ -66,7 +65,28 @@ def blockConsistencyHelper(inode, superblock, group):
 	# First Check for Invalid INODES
 	s = ''
 	lastInodeBlk = int(group[7]) + ((int(superblock[3])*int(superblock[1]))/int(superblock[2]) )
-
+	referenced = []
+	#-------------mark duplicates----------------------
+	for key in inode.keys():
+		for j in range(10,25):
+			if int(inode[key][j]) < 0 or int(inode[key][j]) > int(superblock[0]): #ignore invalid block
+				continue
+			elif int(inode[key][j]) < lastInodeBlk and int(inode[key][j]):		 #ignore reserved block
+				continue
+			else:	
+				if int(inode[key][j]) != 0:
+					referenced.append(int(inode[key][j]))		#add to referenced list
+	for key in indirect.keys():
+		for j in range(0,len(indirect[key])):
+			if int(indirect[key][j][3]) <= 0 or int(indirect[key][j][3]) > int(superblock[0]):	#ignore invalid		
+				continue
+			elif int(indirect[key][j][3]) <= lastInodeBlk:	#ignore
+				continue
+			else:	
+				if int(indirect[key][j][3]) != 0:
+					referenced.append(int(indirect[key][j][3]))	#add to referenced list
+		
+	#---------------go through all inode entries----------------
 	for key in inode.keys():
 		# only check if valid inode num, valid mode number, and greater than zero link count
 		if int(key) > 0 and int(inode[key][1]) > 0 and int(inode[key][4]) > 0:		
@@ -94,14 +114,14 @@ def blockConsistencyHelper(inode, superblock, group):
 					print('RESERVED ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', offset, sep="")
 				
 				else: #mark block as visited or duplicate (maybe create a new array with markers per block) 
-				 	if inode[key][j] in referenced:
+				 	if int(inode[key][j]) != 0 and referenced.count(int(inode[key][j])) > 1: #is duplicate!	
 				 		print('DUPLICATE ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', offset, sep="")
-
-				 	else:
-				 		referenced.append(int(inode[key][j]))	
+					
+				 		
 		#else: #inode block itself has error -- how to handle???
 			#print('INVALID BLOCK ', inode[key], ' IN INODE ', inode[key], ' AT OFFSET ???', sep="")  
 	
+	#-------------------go through all indirect entries---------------
 	for key in indirect.keys():
 		for j in range(0,len(indirect[key])):
 			if int(key) > 0:
@@ -119,13 +139,13 @@ def blockConsistencyHelper(inode, superblock, group):
 				elif int(indirect[key][j][3]) <= lastInodeBlk:
 					print('RESERVED ', blockType, 'BLOCK ', indirect[key][j][3], ' IN INODE ', key, ' AT OFFSET ', indirect[key][j][1], sep="")
 				else:	#mark this block as visited or duplicate
-					if int(indirect[key][j][3]) in referenced:
+					if int(indirect[key][j][3]) != 0 and referenced.count(int(indirect[key][j][3])) > 1:
 						print('DUPLICATE ', blockType, 'BLOCK ', indirect[key][j][3], ' IN INODE ', key, ' AT OFFSET ', indirect[key][j][1], sep="")
-					else:
-						referenced.append(int(indirect[key][j][3]))
 			else:  # what error message do we output here? for later
 				print('INVALID BLOCK ', inode[key], ' IN INODE ', key, ' AT OFFSET ???')  
 	
+		
+		
 	#check for unreferenced blocks - tested by temporarily changing BFREE 37 to an already referenced blocknum (9)
 	possibleValidBlocks = generateAllBlocks(lastInodeBlk) 
 	unreferenced = list(set(possibleValidBlocks) - set(referenced+bfree))
