@@ -13,6 +13,6 @@ default:
 clean:
 	@- rm lab3b $(TARNAME)
 
-dist: 
+dist:  
 	tar -czvf $(TARNAME) $(TARCONTENTS)
 	
