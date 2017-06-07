@@ -102,7 +102,6 @@ def blockConsistencyHelper(inode, superblock, group):
 		#else: #inode block itself has error -- how to handle???
 			#print('INVALID BLOCK ', inode[key], ' IN INODE ', inode[key], ' AT OFFSET ???', sep="")  
 	
-	print(referenced, inode.keys())
 	for key in indirect.keys():
 		for j in range(0,len(indirect[key])):
 			if int(key) > 0:
@@ -168,7 +167,6 @@ def directoryConsistencyAudit():
 					else:							#if not already accounted for
 						fileLinks[inode_num] = 1	#start the first count
 	
-	print(fileLinks)
 	for inode_num in inode.keys():
 		if inode[inode_num][0]=='d' or inode[inode_num][0]=='f' or inode[inode_num][0]=='s': #inode type is file, directory, or link
 			if inode_num in fileLinks.keys():
@@ -226,7 +224,7 @@ def directoryConsistencyAudit():
 				else:
 					print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', inode_num, sep="")
 if __name__=="__main__":
-	read arguments
+	#read arguments
 	if len(sys.argv) < 2:
 		sys.stderr.write('Please provide one file system to test\n')
 		exit(1)
