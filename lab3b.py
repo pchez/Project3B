@@ -70,7 +70,7 @@ def blockConsistencyHelper(inode, superblock, group):
 	for key in inode.keys():
 		# only check if valid inode num, valid mode number, and greater than zero link count
 		if int(key) > 0 and int(inode[key][1]) > 0 and int(inode[key][4]) > 0:		
-
+			#print(key)
 			for j in range(10,25):
 				#print 'key ', key, 'iblock num ', j, 'address ', inode[key][j]  	#for debugging - DELETE
 				
@@ -89,16 +89,15 @@ def blockConsistencyHelper(inode, superblock, group):
 				elif int(inode[key][j]) < lastInodeBlk and int(inode[key][j]) > 0: #reserved block
 					print('RESERVED ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="")
 				
-				else: #mark block as visited or duplicate (maybe create a new array with markers per block) 
-				 	if inode[key][j] in referenced:
-				 		print('DUPLICATE ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET', j-10, sep="")
+				elif int(inode[key][j]) != 0: #mark block as visited or duplicate (maybe create a new array with markers per block) 
+				 	if int(inode[key][j]) in referenced:
+				 		print('DUPLICATE ', blockType, 'BLOCK ', inode[key][j], ' IN INODE ', key, ' AT OFFSET ', j-10, sep="")
 				 	else:
-				 		referenced.append(int(inode[key][j]))
-				 		
+				 		referenced.append(int(inode[key][j]))	
 		#else: #inode block itself has error -- how to handle???
 			#print('INVALID BLOCK ', inode[key], ' IN INODE ', inode[key], ' AT OFFSET ???', sep="")  
 	
-
+	print(referenced, inode.keys())
 	for key in indirect.keys():
 		for j in range(0,len(indirect[key])):
 			if int(key) > 0:
@@ -155,13 +154,7 @@ def directoryConsistencyAudit():
 	
 	#-----------------link count-----------------------------
 	for inode_num in inode.keys(): #first count number of links
-		"""
-		if inode[inode_num][0]=='d' or inode[inode_num][0]=='f' or inode[inode_num][0]=='s':
-			if inode_num in fileLinks.keys(): #if inode_num already accounted for in list of links
-				fileLinks[inode_num] = fileLinks[inode_num] + 1
-			else:							#if not already accounted for
-				fileLinks[inode_num] = 1	#start the first count
-		"""
+		
 		for dir_inode in dirent.keys(): #loop through all directory entries
 			for dir_idx in range(0,len(dirent[dir_inode])):
 				if int(dirent[dir_inode][dir_idx][1])==inode_num:
@@ -170,13 +163,14 @@ def directoryConsistencyAudit():
 					else:							#if not already accounted for
 						fileLinks[inode_num] = 1	#start the first count
 	
+	print(fileLinks)
 	for inode_num in inode.keys():
 		if inode[inode_num][0]=='d' or inode[inode_num][0]=='f' or inode[inode_num][0]=='s': #inode type is file, directory, or link
 			if inode_num in fileLinks.keys():
 				if int(inode[inode_num][4]) != fileLinks[inode_num]:	#num of links that we tracked not same as ref count listed in this entry
 					print('INODE ', inode_num, ' HAS ', fileLinks[inode_num], ' LINKS BUT LINKCOUNT IS ', inode[inode_num][4], sep="")
 			else:
-				print('INODE ', inode_num, ' HAS ', fileLinks[inode_num], ' LINKS BUT LINKCOUNT IS ', inode[inode_num][4], sep="")
+				print('INODE ', inode_num, ' HAS ', 0, ' LINKS BUT LINKCOUNT IS ', inode[inode_num][4], sep="")
 	
 	
 	#----------------directory validity----------------------
@@ -228,12 +222,12 @@ def directoryConsistencyAudit():
 					print('DIRECTORY INODE ', inode_num, ' NAME ', dirent[inode_num][dir_idx][-1], ' LINK TO INODE ', dirent[inode_num][dir_idx][1], ' SHOULD BE ', inode_num, sep="")
 if __name__=="__main__":
 	#read arguments
-	if len(sys.argv) < 2:
-		sys.stderr.write('Please provide one file system to test')
-		exit(1)
+	#if len(sys.argv) < 2:
+#		sys.stderr.write('Please provide one file system to test\n')
+		#exit(1)
 
 	#-----------open file----------------------
-	with open(sys.argv[1]) as filesysCSV:
+	with open('trivial.csv') as filesysCSV:
 		filesysReader = csv.reader(filesysCSV, delimiter=',')
 		filesys = list(filesysReader) #<---- the main data structure that stores everything in a list of lists
 	#except:
